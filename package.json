@@ -1,0 +1,12 @@
+{
+  "name": "urja-voice",
+  "version": "1.0.0",
+  "private": true,
+  "description": "URJA Voice - voice-based energy audit assistant",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "busboy": "^1.6.0"
+  }
+}

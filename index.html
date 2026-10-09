@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>URJA Voice – Speak. Audit. Save.</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Noto+Sans+Telugu:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--teal:#0b7f70;--deep:#064e3b;--em:#10b981;--mint:#ecfdf5;--bg:#f3f6f5;--ink:#0f1f1a;--mut:#5b6b65;--line:#dbe5e1;--warn:#f59e0b}
+*{box-sizing:border-box;margin:0}
+body{font-family:Inter,"Noto Sans Telugu",system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100dvh}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;padding:10px 16px;min-height:44px;background:var(--teal);color:#fff;font-weight:600;transition:transform .1s,background .2s}
+button:active{transform:scale(.97)}button:hover{background:var(--deep)}
+button.ghost{background:#fff;color:var(--teal);border:1.5px solid var(--teal)}button.ghost:hover{background:var(--mint)}
+button.sm{padding:6px 12px;min-height:40px;font-size:13px}button.warn{background:var(--warn);color:#1f1300}
+:focus-visible{outline:3px solid var(--em);outline-offset:2px}
+input,select,textarea{font:inherit;width:100%;padding:10px;border:1.5px solid var(--line);border-radius:10px;min-height:44px;background:#fff}
+label{font-size:13px;font-weight:600;color:var(--mut);display:block;margin:10px 0 4px}
+.card{background:#fff;border-radius:16px;padding:18px;box-shadow:0 1px 3px rgba(6,78,59,.08);border:1px solid var(--line)}
+.grid{display:grid;gap:14px}.g4{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}.g2{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+h1{font-size:clamp(30px,5vw,50px);line-height:1.1;font-weight:800;color:var(--deep)}h2{font-size:22px}h3{font-size:16px}
+.mut{color:var(--mut);font-size:14px}.big{font-size:28px;font-weight:800;color:var(--deep)}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.sp{justify-content:space-between}
+.badge{font-size:11px;font-weight:700;padding:3px 9px;border-radius:99px;display:inline-block}
+.b-user_provided,.b-done{background:#d1fae5;color:#065f46}.b-database,.b-up{background:#dbeafe;color:#1e40af}.b-user_estimated,.b-soon{background:#fef3c7;color:#92400e}.b-missing{background:#fee2e2;color:#991b1b}.b-demo{background:#fff7ed;color:#c2410c;border:1px solid #fdba74;cursor:pointer}
+#side{position:fixed;inset:0 auto 0 0;width:230px;background:var(--deep);color:#fff;padding:20px 14px;display:flex;flex-direction:column;gap:6px}
+#side .logo{font-weight:800;font-size:22px;line-height:1}#side .logo span{color:#6ee7b7}
+#side a{color:#d1fae5;padding:12px;border-radius:12px;cursor:pointer;display:block;font-weight:600}
+#side a.on,#side a:hover{background:rgba(255,255,255,.14);color:#fff}
+#main{margin-left:230px;padding:22px;max-width:1200px}
+#top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:10px;flex-wrap:wrap}
+#bnav{display:none}
+.view{animation:fade .3s}@keyframes fade{from{opacity:0;transform:translateY(6px)}}
+.landing #side,.landing #bnav,.landing #top{display:none}.landing #main{margin:0 auto;max-width:1100px}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:30px;align-items:center;padding:30px 0}
+.phone{width:270px;margin:auto;background:#fff;border:8px solid var(--deep);border-radius:34px;padding:20px;text-align:center}
+.mic{width:130px;height:130px;border-radius:50%;font-size:48px;padding:0;margin:14px auto;display:block;touch-action:none;user-select:none}
+.mic.live{background:#dc2626;animation:pulse 1.2s infinite}@keyframes pulse{50%{box-shadow:0 0 0 22px rgba(220,38,38,.15)}}
+.wave{display:flex;gap:4px;height:40px;align-items:center;justify-content:center}.wave i{width:5px;background:var(--em);border-radius:4px;height:8px}
+.wave.on i{animation:w .8s infinite ease-in-out}.wave i:nth-child(2n){animation-delay:.2s}.wave i:nth-child(3n){animation-delay:.4s}@keyframes w{50%{height:36px}}
+.bar{height:12px;background:var(--mint);border-radius:9px;overflow:hidden}.bar b{display:block;height:100%;background:linear-gradient(90deg,var(--teal),var(--em));transition:width .8s}
+.steps li{list-style:none;padding:7px 0;color:var(--mut)}.steps li.ok{color:var(--deep);font-weight:600}
+.tw{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:9px 8px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--mut);font-size:12px}
+.math{background:var(--mint);border-left:4px solid var(--em);padding:10px 14px;border-radius:10px;margin:6px 0;font-family:ui-monospace,monospace;font-size:13px;white-space:normal}
+.alert{background:#fffbeb;border:1px solid #fcd34d}
+#modal{position:fixed;inset:0;background:rgba(6,30,24,.55);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+#modal.on{display:flex}#modal .card{max-width:480px;width:100%;max-height:90dvh;overflow:auto}
+#toasts{position:fixed;right:16px;bottom:90px;display:grid;gap:8px;z-index:60}.toast{background:var(--deep);color:#fff;padding:12px 16px;border-radius:12px;animation:fade .3s}
+#demobar{position:fixed;left:0;right:0;top:0;background:var(--deep);color:#fff;padding:10px 16px;z-index:70;display:none}
+.tl{border-left:3px solid var(--line);padding-left:16px;display:grid;gap:10px}
+@media(max-width:800px){#side{display:none}#main{margin:0;padding:14px 14px 96px}.hero{grid-template-columns:1fr}
+#bnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--line);justify-content:space-around;padding:6px 4px 10px;z-index:40}
+#bnav a{flex:1;text-align:center;font-size:11px;color:var(--mut);padding:6px 2px;cursor:pointer;font-weight:600}#bnav a.on{color:var(--teal)}#bnav a span{display:block;font-size:20px}
+#bnav a.c span{background:var(--teal);color:#fff;border-radius:50%;width:48px;height:48px;line-height:48px;margin:-22px auto 2px}}
+@media print{#side,#bnav,#top,.noprint,#toasts,#demobar{display:none!important}#main{margin:0;padding:0}body{background:#fff}.card{box-shadow:none}#view>*:not(#report){display:none!important}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body class="landing">
+<nav id="side" aria-label="Main navigation"></nav>
+<div id="main"><header id="top"></header><main id="view"></main></div>
+<nav id="bnav" aria-label="Mobile navigation"></nav>
+<div id="modal" role="dialog" aria-modal="true"></div>
+<div id="toasts" aria-live="polite"></div>
+<div id="demobar"><div id="demotxt"></div><div class="bar" style="margin-top:6px"><b id="demoprog" style="width:0"></b></div></div>
+<script>
+/* ===== CONFIG ===== */
+const KEY='urjaVoiceData',CAT={motor:'⚙',fan:'💨',light:'💡',pump:'💧',fridge:'❄',other:'🔌'};
+const NAV=[['dashboard','⌂','Dashboard'],['audit','🎙','Audit'],['appliances','⚙','Equipment'],['insights','💡','Insights'],['maintenance','🔧','Maintenance'],['reports','📄','Reports']];
+const TE={dashboard:'డాష్‌బోర్డ్',audit:'ఎనర్జీ ఆడిట్',appliances:'పరికరాలు',insights:'సూచనలు',maintenance:'నిర్వహణ',reports:'నివేదికలు',settings:'సెట్టింగ్‌లు',start:'ఆడిట్ ప్రారంభించండి',tap:'మాట్లాడటానికి నొక్కండి',listen:'వింటున్నాం...',speak:'మాట్లాడండి',review:'పరికరాలను పరిశీలించండి',calcE:'ఎనర్జీ లెక్కించండి',daily:'రోజువారీ వినియోగం',monthly:'నెలవారీ వినియోగం',cost:'అంచనా ఖర్చు',startV:'వాయిస్ ఆడిట్ ప్రారంభించండి'};
+const DEMO_TX='నా రైస్ మిల్లులో ఒక మోటార్ ఉంది. అది 2200 వాట్స్. రోజుకు 8 గంటలు నడుస్తుంది. మూడు ఫ్యాన్లు ఉన్నాయి. ఒక్కొక్కటి 70 వాట్స్. రోజుకు 10 గంటలు నడుస్తాయి. ఎనిమిది LED లైట్లు ఉన్నాయి. ఒక్కొక్కటి 12 వాట్స్. రోజుకు 8 గంటలు నడుస్తాయి. ఒక వాటర్ పంప్ ఉంది. అది 750 వాట్స్. రోజుకు 2 గంటలు నడుస్తుంది.';
+const DEMO_TX_EN='I have a rice mill motor. It is 2200 watts. It runs 8 hours a day. There are three fans. Each is 70 watts. They run 10 hours a day. There are eight LED lights. Each is 12 watts. They run 8 hours a day. I have a water pump. It is 750 watts. It runs 2 hours a day.';
+/* ===== STATE & STORAGE ===== */
+const $=s=>document.querySelector(s),uid=()=>Math.random().toString(36).slice(2,8);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let S,V='landing',mem=null,A={stage:'idle',tx:'',lang:'te',draft:[]};
+const day=n=>{const d=new Date();d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)};
+function demoData(){return{biz:{name:'Sri Lakshmi Rice Mill',type:'Rice Mill',loc:'Visakhapatnam, Andhra Pradesh',tariff:8.5,owner:'Ravi'},
+items:[['Rice Mill Motor','motor',1,2200,8],['Ceiling Fan','fan',3,70,10],['LED Light','light',8,12,8],['Water Pump','pump',1,750,2]].map(([name,cat,qty,power,hours])=>({id:uid(),name,cat,qty,power,hours,source:'user_provided'})),
+tasks:[{id:uid(),eq:'Audit',task:'Audit completed',due:day(0),done:true},{id:uid(),eq:'Rice Mill Motor',task:'Motor belt inspection',due:day(7),done:false},{id:uid(),eq:'Water Pump',task:'Pump leakage & wiring inspection',due:day(15),done:false},{id:uid(),eq:'LED Light',task:'Lighting system inspection',due:day(30),done:false}],ui:'en',synced:null}}
+function load(){try{const r=localStorage.getItem(KEY);S=r?JSON.parse(r):(mem||demoData())}catch(e){S=mem||demoData()}save()}
+function save(){mem=S;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* ===== CALCULATIONS (plain deterministic JS, no AI) ===== */
+function calculateAppliance(a,tariff){const q=+a.qty,p=+a.power,h=+a.hours;
+if(!(q>0)||!(p>0)||a.hours==null||!(h>=0&&h<=24)||!(tariff>=0))return null;
+const dailyKwh=q*p*h/1000;return{dailyKwh,monthlyKwh:dailyKwh*30,monthlyCost:dailyKwh*30*tariff}}
+function calculateAudit(list,tariff){const applianceResults=list.map(a=>({a,r:calculateAppliance(a,tariff)})).filter(x=>x.r);
+const sum=k=>applianceResults.reduce((s,x)=>s+x.r[k],0);
+const top=[...applianceResults].sort((x,y)=>y.r.monthlyKwh-x.r.monthlyKwh)[0];
+return{totalDailyKwh:sum('dailyKwh'),totalMonthlyKwh:sum('monthlyKwh'),totalMonthlyCost:sum('monthlyCost'),applianceResults,topConsumer:top?top.a:null}}
+const R=()=>calculateAudit(S.items,S.biz.tariff),f=(n,d=2)=>(+n).toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d}),rs=n=>'₹'+f(n);
+/* ===== LOCALIZATION ===== */
+const t=(k,en)=>S.ui==='te'&&TE[k]?TE[k]:en;
+/* ===== TOASTS & MODALS ===== */
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;$('#toasts').append(d);setTimeout(()=>d.remove(),2800)}
+function modal(h){$('#modal').innerHTML='<div class="card">'+h+'</div>';$('#modal').classList.add('on')}
+function closeModal(){$('#modal').classList.remove('on')}
+/* ===== VOICE: MediaRecorder -> /api/transcribe -> Sarvam Speech-to-Text ===== */
+const REC_OK=!!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia&&window.MediaRecorder),MAX_REC_SEC=30;let recognition=null,isListening=false,finalTranscript='',recErr='';
+const VM={ready:['Ready to listen','వినడానికి సిద్ధంగా ఉంది'],listening:['Recording...','రికార్డ్ అవుతోంది...'],captured:['Voice processed','వాయిస్ ప్రాసెస్ అయింది'],extract:['Extract Equipment','పరికరాలను గుర్తించండి'],demo:['Use Demo Input','డెమో ఇన్‌పుట్ ఉపయోగించండి'],another:['Record Another Audit','మరో ఆడిట్‌ను రికార్డ్ చేయండి'],
+tapstart:['Start Voice Audit','వాయిస్ ఆడిట్ ప్రారంభించండి'],tapstop:['Recording... Tap to Stop','రికార్డింగ్... ఆపడానికి నొక్కండి'],uploading:['Uploading audio...','ఆడియో అప్‌లోడ్ అవుతోంది...'],transcribing:['Transcribing speech...','ప్రసంగాన్ని టెక్స్ట్‌గా మారుస్తోంది...'],
+unsupported:['Microphone recording is not available in this browser.'],denied:['Microphone permission was denied. Please allow microphone access in your browser settings.'],nomic:['Microphone is not available on this device/browser.'],nospeech:['No speech was captured. Please try again.','వాయిస్ గుర్తించబడలేదు. మళ్లీ ప్రయత్నించండి.'],failed:['Unable to process voice right now. Try again, or use Manual Transcript or Demo Input.']};
+const vt=k=>VM[k][S.ui==='te'?1:0]||VM[k][0];
+const SRCL={microphone:'🎙️ LIVE MICROPHONE',demo:'🧪 DEMO INPUT',manual:'⌨️ MANUAL INPUT'};
+const srcHTML=()=>A.src?SRCL[A.src]+(A.src==='demo'?' · predefined transcript':''):'';
+function updSrc(){const b=$('#srcb');if(b){b.textContent=srcHTML();b.style.display=A.src?'':'none'}}
+function setVS(vs,key){A.vs=vs;A.vkey=key;micUI()}
+/* Clears ONLY the current voice session (never saved equipment/dashboard/maintenance/reports). Also invalidates any in-flight upload. */
+let reqId=0,recorder=null,stream=null,chunks=[],recTimer=null,starting=false,recCancel=false;
+function clearCurrentTranscript(){reqId++;A.tx='';A.src=null;A.vs='ready';A.vkey='';A.dbg='';finalTranscript='';const el=$('#tx');if(el)el.value='';updSrc()}
+const MIMES=['audio/webm;codecs=opus','audio/webm','audio/mp4','audio/ogg;codecs=opus'];
+function releaseStream(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function startLiveRecognition(){
+if(!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window))return;
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+try{
+recognition=new SR();
+recognition.lang=A.lang==='te'?'te-IN':'en-IN';
+recognition.continuous=true;
+recognition.interimResults=true;
+recognition.maxAlternatives=1;
+recognition.onresult=e=>{
+let interim='';
+for(let i=e.resultIndex;i<e.results.length;i++){
+const text=e.results[i][0].transcript;
+if(e.results[i].isFinal)finalTranscript+=text+' ';
+else interim+=text;
+}
+const liveText=(finalTranscript+interim).trim();
+A.tx=liveText;
+const el=$('#tx');
+if(el)el.value=liveText;
+};
+recognition.onerror=e=>{
+console.log('[URJA] Live recognition:',e.error);
+};
+recognition.onend=()=>{
+if(isListening&&recognition){
+try{recognition.start()}catch(e){}
+}
+};
+recognition.start();
+}catch(e){
+console.log('[URJA] Live recognition unavailable:',e);
+recognition=null;
+}
+}
+
+function stopLiveRecognition(){
+if(recognition){
+const r=recognition;
+recognition=null;
+try{r.onend=null;r.stop()}catch(e){}
+}
+}
+/* ---- REAL microphone: first tap starts MediaRecorder, second tap stops it ---- */
+async function startRec(){if(isListening||recorder||starting||A.vs==='processing')return;
+clearCurrentTranscript();
+finalTranscript='';
+if(!REC_OK){setVS('error','unsupported');return}
+starting=true;
+try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){starting=false;A.dbg=e&&e.name;setVS('error',e&&(e.name==='NotAllowedError'||e.name==='SecurityError')?'denied':'nomic');return}
+starting=false;
+const mime=MIMES.find(m=>MediaRecorder.isTypeSupported(m))||'';
+try{recorder=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream)}catch(e){releaseStream();recorder=null;A.dbg=String(e);setVS('error','nomic');return}
+chunks=[];recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};recorder.onstop=onRecorded;
+recorder.start();isListening=true;startLiveRecognition();console.log('[URJA] Recording started, type:',recorder.mimeType);
+recTimer=setTimeout(()=>{if(isListening){toast('Maximum recording time reached.');stopRec()}},MAX_REC_SEC*1000);
+setVS('listening')}
+function stopRec(){if(recorder&&isListening){isListening=false;clearTimeout(recTimer);stopLiveRecognition();try{recorder.stop()}catch(e){}}}
+function cancelRec(){if(recorder&&isListening){recCancel=true;stopLiveRecognition();stopRec()}else stopLiveRecognition()}
+/* Browser -> 16 kHz mono WAV (a format Sarvam documents) */
+async function toWav16k(blob){const AC=window.AudioContext||window.webkitAudioContext,ctx=new AC();let dec;try{dec=await ctx.decodeAudioData(await blob.arrayBuffer())}finally{if(ctx.close)ctx.close()}
+const off=new OfflineAudioContext(1,Math.max(1,Math.ceil(dec.duration*16000)),16000),src=off.createBufferSource();src.buffer=dec;src.connect(off.destination);src.start();
+const d=(await off.startRendering()).getChannelData(0),b=new ArrayBuffer(44+d.length*2),v=new DataView(b),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+w(0,'RIFF');v.setUint32(4,36+d.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,d.length*2,true);
+for(let i=0;i<d.length;i++){const s=Math.max(-1,Math.min(1,d[i]));v.setInt16(44+i*2,s<0?s*0x8000:s*0x7fff,true)}
+return new Blob([b],{type:'audio/wav'})}
+async function onRecorded(){const type=(recorder&&recorder.mimeType)||'audio/webm';releaseStream();recorder=null;
+const raw=new Blob(chunks,{type});chunks=[];
+if(recCancel){recCancel=false;A.vs='ready';return}
+if(!raw.size){setVS('error','nospeech');return}
+const my=++reqId;setVS('processing','uploading');setTimeout(()=>{if(my===reqId&&A.vs==='processing')setVS('processing','transcribing')},900);
+let up=raw,name='urja-audit.'+(type.includes('mp4')?'m4a':type.includes('ogg')?'ogg':'webm');
+try{up=await toWav16k(raw);name='urja-audit.wav'}catch(e){console.log('[URJA] WAV conversion failed, sending original',e)}
+const audioBytes=new Uint8Array(await up.arrayBuffer());
+let binary='';
+const CHUNK=0x8000;
+for(let i=0;i<audioBytes.length;i+=CHUNK){
+  binary+=String.fromCharCode(...audioBytes.subarray(i,Math.min(i+CHUNK,audioBytes.length)));
+}
+const audioBase64=btoa(binary);
+const payload={
+  audio:audioBase64,
+  mimeType:up.type||'audio/wav',
+  fileName:name,
+  language:A.lang==='te'?'te-IN':'en-IN'
+};
+try{const r=await fetch('/api/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});let j=null;try{j=await r.json()}catch(e){}
+if(my!==reqId)return;
+if(!r.ok||!j||!j.success){A.dbg=(j&&(j.code+': '+j.error))||('HTTP '+r.status+(location.protocol==='file:'?' (open the app through a server, not file://)':''));setVS('error','failed');return}
+const text=String(j.text||'').trim();if(!text){setVS('error','nospeech');return}
+A.tx=text;A.src='microphone';const el=$('#tx');if(el)el.value=text;console.log('[URJA] Sarvam transcript:',text);setVS('captured');toast('Transcript received.')}
+catch(e){if(my!==reqId)return;A.dbg=String(e);setVS('error','failed')}}
+function toggleRecording(){if(A.vs==='processing'||starting)return;if(!isListening)startRec();else stopRec()}
+function micUI(){const m=$('#mic');if(!m)return;const L=A.vs==='listening',B=A.vs==='processing',C=A.vs==='captured',E=A.vs==='error';
+m.classList.toggle('live',L);m.disabled=B;m.textContent=L?'🔴':B?'⏳':'🎙️';m.setAttribute('aria-pressed',L?'true':'false');
+$('#miclbl').textContent=L?vt('tapstop'):B?vt(A.vkey||'uploading'):vt('tapstart');
+const v=$('#vstat');v.textContent=L?'🔴 '+vt('listening'):B?'⏳ '+vt(A.vkey||'uploading'):E?'⚠️ '+vt(A.vkey):C?'✓ '+vt('captured'):'● '+vt('ready');v.style.color=E?'#991b1b':'';v.setAttribute('role',E?'alert':'status');
+const d=$('#dbg');if(d)d.textContent=E&&A.dbg?'Details: '+A.dbg:'';
+$('#wv').classList.toggle('on',L);updSrc()}
+/* ===== DEMO AI (swap for real Bhashini / LLM / Supabase later) ===== */
+const NUM={'ఒక':1,'ఒకటి':1,'రెండు':2,'మూడు':3,'నాలుగు':4,'ఐదు':5,'ఆరు':6,'ఏడు':7,'ఎనిమిది':8,'తొమ్మిది':9,'పది':10,one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
+const KW=[[/డ్రిల్|drill/i,'Drill Machine','other'],[/వెల్డింగ్|weld/i,'Welding Machine','other'],[/గ్రైండ|grind/i,'Grinding Machine','other'],[/కంప్రెసర్|compressor/i,'Air Compressor','other'],[/కంప్యూటర్|computer/i,'Computer','other'],[/పంప్|పంపు|pump/i,'Water Pump','pump'],[/ఫ్యాన్|fan/i,'Ceiling Fan','fan'],[/LED|ఎల్ఈడీ|లైట్|light|bulb/i,'LED Light','light'],[/ఫ్రిజ్|fridge|refrigerator/i,'Refrigerator','fridge'],[/మోటార్|motor/i,'Motor','motor']];
+function demoExtractAppliances(tx){const U=/^(వాట్|watt|w$|గంట|hour|hr)/i;
+const w=tx.replace(/[.,।]/g,' ').split(/\s+/).filter(Boolean);
+w.forEach((x,k)=>{if(NUM[x.toLowerCase()]&&w[k+1]&&U.test(w[k+1]))w[k]=String(NUM[x.toLowerCase()])});
+const ix=[];w.forEach((x,i)=>{const k=KW.find(k=>k[0].test(x));if(k&&!(ix.length&&i-ix[ix.length-1][0]<=1))ix.push([i,k])});
+return ix.map(([i,k],n)=>{const prev=n?ix[n-1][0]:-1,nx=n+1<ix.length?ix[n+1][0]:w.length;let q=1;
+for(let j=i-1;j>=Math.max(i-3,prev+1);j--){const s=w[j].toLowerCase();if(/^\d+$/.test(s)&&!(w[j+1]&&U.test(w[j+1]))){q=+s;break}if(NUM[s]){q=NUM[s];break}}
+const seg=w.slice(i+1,nx).join(' '),wm=seg.match(/(\d+(?:\.\d+)?)\s*(?:వాట్|watt|w\b)/i),hm=seg.match(/(\d+(?:\.\d+)?)\s*(?:గంట|hour|hr)/i),mill=w.slice(Math.max(0,i-4),i).some(x=>/మిల్|mill/i.test(x));
+return{id:uid(),name:k[2]==='motor'&&mill?'Rice Mill Motor':k[1],cat:k[2],qty:q,power:wm?+wm[1]:null,hours:hm?+hm[1]:null,source:wm?'user_provided':'missing'}})}
+function demoGenerateRecommendations(r){const tp=r.applianceResults.slice().sort((a,b)=>b.r.monthlyKwh-a.r.monthlyKwh)[0];
+return[['High consumption',tp?`${tp.a.name} is your largest energy consumer (about ${f(tp.r.monthlyKwh/r.totalMonthlyKwh*100,0)}% of estimated monthly use).`:'Add equipment to see your top consumer.','⚡'],
+['Operating efficiency','Switch off equipment during idle periods and check motor belt tension regularly.','💡'],
+['Maintenance','Inspect pump leakage and electrical connections. Regular motor maintenance helps keep efficiency up.','🔧'],
+['Scheduling','Consider shifting flexible loads away from high-demand periods where applicable.','🕒'],
+['Replacement','Use high-efficiency motors and LED fixtures when replacing old equipment.','🔁'],
+['Programs','Check with the relevant state/MSME department for currently applicable energy-efficiency programs. No scheme is verified in this prototype.','🏛']]}
+function demoSync(){S.synced=new Date().toLocaleString();save();toast('Demo Sync complete. Nothing was sent anywhere.');render()}
+/* ===== UI HELPERS ===== */
+const badge=s=>`<span class="badge b-${s}">${{user_provided:'USER PROVIDED',database:'DATABASE',user_estimated:'ESTIMATED',missing:'MISSING'}[s]}</span>`;
+const demoTag='<span class="badge b-demo" data-a="info" tabindex="0" role="button">DEMO MODE</span>';
+const empty=m=>`<div class="card" style="text-align:center;padding:40px"><h2>${m}</h2><p class="mut">Start a voice audit or add equipment manually.</p><br><button data-a="go" data-v="audit">Start Audit</button></div>`;
+const online=()=>navigator.onLine;
+/* ===== VIEWS ===== */
+function landing(){const c=S.items.length?R().totalMonthlyCost:0;
+return`<div class="hero"><div><b style="font-size:22px;color:var(--deep)">⚡ URJA VOICE</b><br><br><h1>Energy Audits, Simply by Speaking.</h1><br>
+<p class="mut" style="font-size:17px">URJA Voice helps rural enterprises understand electricity usage, estimate costs, identify energy-heavy equipment, and discover practical ways to save — in their own language.</p><br>
+<div class="row"><button data-a="go" data-v="audit">Start Energy Audit</button><button class="ghost" data-a="go" data-v="dashboard">Try Demo</button><button class="warn" data-a="runDemo">▶ Run 2-Minute Demo</button></div><br>
+<p class="mut">Speak. Audit. Save. For shops, workshops, dairies, mills and homestays. Prototype, demo mode.</p></div>
+<div class="phone"><b>తెలుగు</b><div class="mut">Listening...</div><div class="mic live" style="background:var(--teal);color:#fff;width:90px;height:90px;line-height:90px;font-size:36px">🎙</div><div class="wave on"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="card" style="margin-top:12px;padding:10px"><div class="mut">Monthly cost (demo)</div><div class="big">${rs(c)}</div></div></div></div>
+<div class="grid g4">${[['Speak','Tell us about your machines naturally.'],['Understand','Speech becomes structured equipment data.'],['Calculate','Deterministic formulas. Never AI math.'],['Improve','Practical, business-specific tips.']].map((x,i)=>`<div class="card"><h3>${i+1}. ${x[0]}</h3><p class="mut">${x[1]}</p></div>`).join('')}</div>`}
+function confCard(){const w={user_provided:.95,database:.85,user_estimated:.65,missing:0},c=S.items.length?S.items.reduce((s,i)=>s+w[i.source],0)/S.items.length*100:0,est=S.items.some(i=>i.source==='user_estimated');
+return`<div class="card"><div class="mut">Audit Confidence</div><div class="big">${f(c,0)}%</div><p class="mut" style="font-size:13px">${est?'Contains estimated equipment values':'✓ User-provided power ratings<br>✓ User-provided usage hours<br>✓ Verified calculations'}</p></div>`}
+function scoreCard(top){const miss=S.items.filter(i=>i.source==='missing').length,od=S.tasks.filter(x=>!x.done&&x.due<day(0)).length,sc=Math.max(0,Math.round(100-Math.max(0,top-30)*.6-miss*10-od*5));
+return`<div class="card"><div class="mut">URJA efficiency snapshot</div><div class="big">${sc} / 100</div><p class="mut" style="font-size:12px">UI-level demo metric (load concentration, missing values, maintenance). Not an official rating.</p></div>`}
+function dashboard(){if(!S.items.length)return empty('No equipment added yet.');
+const r=R(),tp=r.applianceResults.slice().sort((a,b)=>b.r.monthlyKwh-a.r.monthlyKwh),h=new Date().getHours(),g=h<12?'morning':h<17?'afternoon':'evening';
+const topS=tp[0].r.monthlyKwh/r.totalMonthlyKwh*100,m=S.items.find(i=>i.cat==='motor');
+let saving=0;if(m){const a=calculateAppliance(m,S.biz.tariff),b=calculateAppliance({...m,hours:Math.max(0,m.hours-1)},S.biz.tariff);if(a&&b)saving=a.monthlyCost-b.monthlyCost}
+const kp=[["Today's Usage",r.totalDailyKwh,' kWh',1,''],['Monthly Usage',r.totalMonthlyKwh,' kWh',1,''],['Monthly Cost',r.totalMonthlyCost,'',0,'₹'],['What-if Saving',saving,'',0,'₹']];
+return`<div class="row sp"><div><h2>Good ${g}, ${esc(S.biz.owner)} 👋</h2><p class="mut">${esc(S.biz.name)} · ${esc(S.biz.loc)}</p></div><span class="badge b-demo">DEMO DATA</span></div><br>
+<div class="grid g4">${kp.map(k=>`<div class="card"><div class="mut">${k[0]}</div><div class="big" data-count="${k[1]}" data-d="${k[3]}" data-p="${k[4]}" data-s="${k[2]}">0</div>${k[0]==='What-if Saving'?'<div class="mut" style="font-size:12px">If the motor ran 1 hr/day less (calculated)</div>':''}</div>`).join('')}</div><br>
+<div class="grid g2"><div class="card"><div class="row sp"><h3>Energy Consumption (estimated usage)</h3><div class="row"><button class="sm ghost" data-a="range" data-n="7">7 Days</button><button class="sm ghost" data-a="range" data-n="30">30 Days</button></div></div><div style="height:240px"><canvas id="ch" aria-label="Estimated energy consumption chart"></canvas></div><div id="chfb"></div></div>
+<div class="card"><h3>Top Energy Consumers</h3><br>${tp.map(x=>{const p=x.r.monthlyKwh/r.totalMonthlyKwh*100;return`<div class="row sp"><span>${CAT[x.a.cat]||'🔌'} ${esc(x.a.name)}</span><b>${f(p,0)}%</b></div><div class="bar" style="margin:4px 0 10px"><b style="width:${p}%"></b></div>`}).join('')}</div></div><br>
+<div class="card alert"><b>⚡ High Energy Consumer Detected</b><p>Your ${esc(tp[0].a.name.toLowerCase())} accounts for approximately ${f(topS,0)}% of estimated monthly consumption.</p><br><button class="warn sm" data-a="go" data-v="insights">View Recommendation</button></div><br>
+<div class="grid g4">${confCard()}${scoreCard(topS)}${[['🎙 Start Voice Audit','go','audit'],['➕ Add Appliance','add',''],['📊 View Energy Report','go','reports'],['🔧 Maintenance','go','maintenance']].map(q=>`<button class="ghost" style="padding:22px" data-a="${q[1]}" data-v="${q[2]}">${q[0]}</button>`).join('')}</div>`}
+function audit(){const L=A.lang,s=A.stage;if(A.src==='demo'&&A.vs!=='demo'){clearCurrentTranscript()}if(s==='review')return reviewView();if(s==='results')return resultsView();
+if(s==='processing')return`<div class="card"><div class="row sp"><h2>Equipment Intelligence</h2>${demoTag}</div><ul class="steps" id="steps">${[A.src==='microphone'?'Voice captured':'Transcript received','Language set (from your selection)','Equipment extracted','Information verified (after your review)','Energy calculated (after analysis)'].map(x=>`<li>○ ${x}</li>`).join('')}</ul></div>`;
+return`<div class="card" style="text-align:center"><div class="mut" style="font-weight:700;letter-spacing:.5px">VOICE ENERGY AUDIT</div><h2>Tell us about your equipment</h2><p class="mut">You don't need technical knowledge. Just describe your machines naturally.</p><br>
+<div class="row" style="justify-content:center"><label for="langsel" style="margin:0">Language</label><select id="langsel" style="width:auto"><option value="te" ${L==='te'?'selected':''}>🇮🇳 Telugu</option><option value="en" ${L==='en'?'selected':''}>🇮🇳 English</option></select></div>
+<button id="mic" class="mic ${s==='listening'?'live':''}" aria-label="Tap once to start recording, tap again to stop">🎙</button>
+<b id="miclbl">${t('startV','Start Voice Audit')}</b><div id="wv" class="wave ${s==='listening'?'on':''}">${'<i></i>'.repeat(9)}</div><div id="vstat" class="mut" role="status" aria-live="polite" style="font-weight:600;margin-top:4px"></div><div id="dbg" class="mut" style="font-size:11px;word-break:break-word"></div>
+<p class="mut" style="font-size:12px"><span class="badge b-database">Sarvam Speech-to-Text</span> Audio is sent to your server (/api/transcribe). Maximum recording time: ${MAX_REC_SEC} seconds.</p>${A.src==='demo'?'<p class="mut" style="font-size:12px">Demo Input — predefined transcript.</p>':''}${window.isSecureContext?'':'<p class="mut" style="font-size:12px">Microphone access requires HTTPS and browser permission.</p>'}${REC_OK?'':'<div class="card alert" role="alert" style="margin-top:10px">Microphone recording is not available in this browser. Use Manual Transcript or Demo Input.</div>'}<br>
+<div class="row sp"><label for="tx" style="margin:0">Transcript</label><span id="srcb" class="badge b-user_provided" style="${A.src?'':'display:none'}">${srcHTML()}</span></div><textarea id="tx" rows="4" aria-label="Transcript" placeholder="Paste or type your audit description...">${esc(A.tx)}</textarea>
+<div class="row" style="justify-content:center;margin-top:12px"><button class="ghost" data-a="demoVoice">${vt('demo')}</button><button class="ghost" data-a="manual">Enter Transcript Manually</button><button data-a="process">${vt('extract')}</button></div></div>`}
+function cardHTML(i){const miss=!(i.power>0);return`<div class="card"><h3>${CAT[i.cat]||'🔌'} ${esc(i.name)}</h3><br>
+<div class="row sp"><span class="mut">Quantity</span><b>${i.qty}</b></div><div class="row sp"><span class="mut">Power</span><b>${miss?'—':i.power+' W'}</b></div><div class="row sp"><span class="mut">Usage</span><b>${i.hours==null?'—':i.hours+' hrs/day'}</b></div><br>
+${badge(i.source)}${i.source==='user_estimated'?'<div class="mut" style="font-size:12px">Estimated value. You can change this later.</div>':''}
+${miss?`<div style="color:#991b1b;margin:6px 0">Power rating needed</div><button class="warn sm" data-a="power" data-id="${i.id}">Select size</button>`:''}<br><br>
+<div class="row"><button class="sm ghost" data-a="edit" data-id="${i.id}">Edit</button><button class="sm ghost" data-a="del" data-id="${i.id}">Remove</button></div></div>`}
+function reviewView(){return`<div class="row sp"><h2>${S.ui==='te'?TE.review:'Review Your Equipment'}</h2>${demoTag}</div><p class="mut">Check the information before calculating your energy usage. Extraction runs in demo mode.</p><div class="row" style="margin-top:8px"><button class="ghost" data-a="another">🎙️ ${vt('another')}</button></div><br>
+<div class="card" style="margin-bottom:12px"><div class="row sp"><b>VOICE TRANSCRIPT</b><span><span class="badge b-database">${A.lang==='te'?'TELUGU':'ENGLISH'}</span> <span class="badge b-user_provided">${srcHTML()}</span></span></div><p class="mut" style="margin-top:8px">${esc(A.tx)}</p></div><p><b>${A.draft.length} equipment types identified</b></p><br>${A.draft.length?`<div class="grid g4">${A.draft.map(cardHTML).join('')}</div>`:empty('No equipment found in that transcript.')}<br>
+<div class="row"><button class="ghost" data-a="add" data-d="1">+ Add Equipment</button><button data-a="calc">${S.ui==='te'?TE.calcE:'Run Energy Analysis'}</button></div>`}
+function mathHTML(a,r){return`<div class="math">${a.qty} × ${a.power} W × ${a.hours} hrs ÷ 1000<br>= <b>${f(r.dailyKwh)} kWh/day</b></div><div class="math">${f(r.dailyKwh)} × 30<br>= <b>${f(r.monthlyKwh)} kWh/month</b></div><div class="math">${f(r.monthlyKwh)} × ₹${f(S.biz.tariff)}<br>= <b>${rs(r.monthlyCost)}/month</b></div>`}
+function table(rr,withBtn=true){return`<div class="tw"><table><tr><th>Equipment</th><th>Qty</th><th>Power</th><th>Hours</th><th>Daily kWh</th><th>Monthly kWh</th><th>Monthly Cost</th>${withBtn?'<th></th>':''}</tr>${rr.applianceResults.map((x,n)=>`<tr><td>${CAT[x.a.cat]||'🔌'} ${esc(x.a.name)}</td><td>${x.a.qty}</td><td>${x.a.power} W</td><td>${x.a.hours}</td><td>${f(x.r.dailyKwh,3)}</td><td>${f(x.r.monthlyKwh)}</td><td>${rs(x.r.monthlyCost)}</td>${withBtn?`<td><button class="sm ghost" data-a="math" data-n="${n}">Show calculation</button></td>`:''}</tr>${withBtn?`<tr id="m${n}" hidden><td colspan="8">${mathHTML(x.a,x.r)}</td></tr>`:''}`).join('')}</table></div>`}
+function resultsView(){const r=R();return`<div class="card"><h2>Energy Audit Complete ✓</h2><ul class="steps" style="display:flex;gap:14px;flex-wrap:wrap">${[A.src==='microphone'?'Voice captured':'Transcript received','Language set','Equipment extracted','Information verified','Energy calculated'].map(x=>`<li class="ok">✓ ${x}</li>`).join('')}</ul><br><div class="grid g4"><div><div class="mut">${S.ui==='te'?TE.daily:'Daily consumption'}</div><div class="big">${f(r.totalDailyKwh)} kWh</div></div><div><div class="mut">${S.ui==='te'?TE.monthly:'Monthly consumption'}</div><div class="big">${f(r.totalMonthlyKwh)} kWh</div></div><div><div class="mut">${S.ui==='te'?TE.cost:'Estimated monthly cost'}</div><div class="big">${rs(r.totalMonthlyCost)}</div></div><div><div class="mut">Equipment</div><div class="big">${r.applianceResults.length} types</div></div></div><br><div class="alert card" style="padding:12px"><span class="mut">Top energy consumer:</span> <b>${r.topConsumer?esc(r.topConsumer.name):'—'}</b>${(x=>x?' · '+f(x.r.monthlyKwh)+' kWh/month':'')(r.applianceResults.find(y=>y.a===r.topConsumer))}</div></div><br><div class="card">${table(r)}</div><br><div class="row"><button data-a="go" data-v="dashboard">Open Dashboard</button><button class="ghost" data-a="go" data-v="insights">Savings opportunities</button><button class="ghost" data-a="another">🎙️ ${vt('another')}</button></div>`}
+function appliances(){if(!S.items.length)return empty('No equipment added yet.');const r=R();
+return`<div class="row sp"><h2>Equipment</h2><button data-a="add">➕ Add Appliance</button></div><br><div class="grid g4">${r.applianceResults.map(x=>`<div class="card"><h3>${CAT[x.a.cat]||'🔌'} ${esc(x.a.name)}</h3><p class="mut">${x.a.cat} · ${x.a.qty} × ${x.a.power} W · ${x.a.hours} hrs/day</p><div class="big" style="font-size:22px">${f(x.r.monthlyKwh)} kWh</div><div class="mut">${rs(x.r.monthlyCost)}/month ${x.r.monthlyKwh/r.totalMonthlyKwh>.3?'<span class="badge b-user_estimated">HIGH</span>':''}</div><br>${badge(x.a.source)}<br><br><div class="row"><button class="sm ghost" data-a="edit" data-id="${x.a.id}">Edit</button><button class="sm ghost" data-a="del" data-id="${x.a.id}">Remove</button></div></div>`).join('')}</div>`}
+function insights(){if(!S.items.length)return empty('No equipment added yet.');const r=R();
+return`<div class="row sp"><h2>AI ENERGY INSIGHTS</h2>${demoTag}</div><p class="mut">Practical recommendations based on your calculated energy profile. No AI is used for calculation.</p><br>
+<div class="card"><h3>Your energy profile</h3><p>${f(r.totalMonthlyKwh,1)} kWh/month · ${rs(r.totalMonthlyCost)}/month at ₹${f(S.biz.tariff)}/kWh · ${S.items.length} equipment types</p></div><br>
+<div class="grid g2">${demoGenerateRecommendations(r).map(x=>`<div class="card"><h3>${x[2]} ${x[0]}</h3><p class="mut">${esc(x[1])}</p></div>`).join('')}</div><br><h2>Where You Can Save</h2><br>
+<div class="grid g4">${[['Reduce idle operation','Operational saving','Easy'],['Motor maintenance','Efficiency improvement','Easy'],['Efficient lighting','Lower lighting consumption','Medium']].map(x=>`<div class="card"><h3>${x[0]}</h3><p class="mut">Potential: ${x[1]}<br>Difficulty: ${x[2]}</p></div>`).join('')}</div><p class="mut" style="margin-top:10px">Exact rupee savings are not stated because they depend on measured idle time. The dashboard shows a calculated what-if for the motor only.</p>`}
+function status(x){if(x.done)return['Completed','b-done'];const d=Math.round((new Date(x.due)-new Date(day(0)))/864e5);return d<=7?['Due Soon','b-soon']:['Upcoming','b-up']}
+function maintenance(){const ts=S.tasks.slice().sort((a,b)=>a.due.localeCompare(b.due));
+return`<div class="row sp"><h2>Equipment Maintenance</h2><button data-a="addTask">➕ Add Task</button></div><br><div class="tl">${ts.map(x=>{const s=status(x),d=Math.round((new Date(x.due)-new Date(day(0)))/864e5);return`<div class="card"><div class="row sp"><div><b>${esc(x.task)}</b><div class="mut">${esc(x.eq)} · ${x.done?'done':d<=0?'today / overdue':'in '+d+' days'} (${x.due})</div></div><span class="badge ${s[1]}">${s[0]}</span></div>${x.done?'':`<br><div class="row"><button class="sm" data-a="done" data-id="${x.id}">Mark Complete</button><button class="sm ghost" data-a="resched" data-id="${x.id}">Reschedule +7 days</button></div>`}</div>`}).join('')}</div>`}
+function reports(){if(!S.items.length)return empty('No equipment added yet.');const r=R();
+return`<div class="row sp noprint"><h2>Reports</h2><div class="row"><button data-a="print">Print / Save as PDF</button><button class="ghost" data-a="download">Download Report</button></div></div><br>
+<div id="report" class="card"><div class="row sp"><b style="font-size:22px;color:var(--deep)">⚡ URJA VOICE</b><b>ENERGY AUDIT REPORT</b></div><hr style="margin:12px 0;border:0;border-top:2px solid var(--teal)">
+<h3>1. Business Overview</h3><p>${esc(S.biz.name)} · ${esc(S.biz.type)} · ${esc(S.biz.loc)}<br>Audit date: ${new Date().toLocaleDateString('en-IN')} · Tariff ₹${f(S.biz.tariff)}/kWh · Demo mode estimates</p><br>
+<h3>2. Energy Summary</h3><p>Daily: <b>${f(r.totalDailyKwh,3)} kWh</b> · Monthly: <b>${f(r.totalMonthlyKwh)} kWh</b> · Estimated monthly cost: <b>${rs(r.totalMonthlyCost)}</b></p><br>
+<h3>3. Equipment Breakdown</h3>${table(r,false)}<br>
+<h3>4. Major Energy Consumers</h3><p>${r.applianceResults.slice().sort((a,b)=>b.r.monthlyKwh-a.r.monthlyKwh).slice(0,3).map(x=>`${esc(x.a.name)} (${f(x.r.monthlyKwh/r.totalMonthlyKwh*100,0)}%)`).join(', ')}</p><br>
+<h3>5. AI Recommendations (demo mode)</h3><ul style="padding-left:20px">${demoGenerateRecommendations(r).map(x=>`<li>${esc(x[1])}</li>`).join('')}</ul><br>
+<h3>6. Maintenance Schedule</h3><ul style="padding-left:20px">${S.tasks.map(x=>`<li>${x.due}: ${esc(x.task)} (${status(x)[0]})</li>`).join('')}</ul><br>
+<h3>7. Calculation Method</h3><p>Energy calculations are deterministic and based on equipment quantity, power rating, operating hours, and configured tariff. Daily kWh = quantity × watts × hours ÷ 1000. Monthly kWh = daily × 30. Monthly cost = monthly kWh × tariff.</p><br>
+<p class="mut" style="font-size:12px">URJA Voice provides estimated energy usage and cost calculations based on the equipment information and electricity tariff entered by the user. Actual electricity bills may vary based on tariff structure, demand charges, taxes, meter readings, and other utility-specific factors.</p></div>`}
+function settings(){const b=S.biz;return`<h2>Settings</h2><br><div class="grid g2"><div class="card"><h3>Business Profile</h3><form id="pf"><label>Business name</label><input name="name" value="${esc(b.name)}"><label>Business type</label><input name="type" value="${esc(b.type)}"><label>Location</label><input name="loc" value="${esc(b.loc)}"><label>Electricity tariff (₹/kWh)</label><input name="tariff" type="number" step="0.01" min="0" value="${b.tariff}"><br><br><button type="submit">Save changes</button></form></div>
+<div class="card"><h3>Integrations</h3><br>${[['Bhashini API','Demo Mode'],['LLM','Demo Mode'],['Supabase','Local Storage / Demo Mode']].map(x=>`<div class="row sp" style="margin:8px 0"><span>${x[0]}</span><span class="badge b-demo">${x[1]}</span></div>`).join('')}<p class="mut">Production deployment connects these adapters to the corresponding APIs. No keys are stored in this file.</p><br>
+<div class="row"><button class="ghost" data-a="sync">Demo Sync</button><span class="mut">${S.synced?'Last: '+esc(S.synced):''}</span></div><br><button class="warn" data-a="reset">Reset Demo Data</button></div></div>`}
+const VIEWS={landing,dashboard,audit,appliances,insights,maintenance,reports,settings};
+/* ===== CHARTS ===== */
+let chart=null;
+function series(n){const fc=[.95,.98,1.01,.97,1.05,1.02,.9],T=R().totalDailyKwh,lab=[],d=[];for(let i=n-1;i>=0;i--){const dt=new Date();dt.setDate(dt.getDate()-i);lab.push(dt.toLocaleDateString('en-IN',{day:'numeric',month:'short'}));d.push(+(T*fc[(n-1-i)%7]).toFixed(2))}return{lab,d}}
+function drawChart(n=7){const c=$('#ch');if(!c)return;const s=series(n);if(chart){chart.destroy();chart=null}
+if(window.Chart){chart=new Chart(c,{type:'bar',data:{labels:s.lab,datasets:[{label:'Estimated kWh',data:s.d,backgroundColor:'#0b7f70',borderRadius:6}]},options:{maintainAspectRatio:false,plugins:{legend:{display:false}}}})}
+else{c.style.display='none';const m=Math.max(...s.d);$('#chfb').innerHTML=s.d.map((v,i)=>`<div class="row sp mut"><span>${s.lab[i]}</span><div class="bar" style="flex:1"><b style="width:${v/m*100}%"></b></div><span>${v}</span></div>`).join('')}}
+function counters(){document.querySelectorAll('[data-count]').forEach(el=>{const v=+el.dataset.count,d=+el.dataset.d,p=el.dataset.p,s=el.dataset.s,fin=()=>el.textContent=p+f(v,d)+s;
+if(matchMedia('(prefers-reduced-motion:reduce)').matches)return fin();const t0=performance.now();(function st(n){const k=Math.min(1,(n-t0)/800);el.textContent=p+f(v*k,d)+s;if(k<1)requestAnimationFrame(st);else fin()})(t0)})}
+/* ===== NAVIGATION & RENDER ===== */
+function go(v){cancelRec();if(v==='audit'){clearCurrentTranscript();A.stage='idle';A.draft=[]}V=v;render();scrollTo(0,0)}
+function render(){document.body.classList.toggle('landing',V==='landing');
+try{$('#view').innerHTML=VIEWS[V]()}catch(e){$('#view').innerHTML='<div class="card"><h2>We couldn\'t process that yet</h2><button data-a="go" data-v="dashboard">Back to dashboard</button></div>'}
+const nav=NAV.map(([k,i,l])=>`<a role="link" tabindex="0" class="${V===k?'on':''} ${k==='audit'?'c':''}" data-a="go" data-v="${k}"><span>${i}</span>${t(k,l)}</a>`).join('');
+$('#side').innerHTML=`<div class="logo">URJA<br><span>VOICE</span></div><div style="color:#a7f3d0;margin-bottom:14px;font-size:13px">Speak. Audit. Save.</div>${nav}<div style="flex:1"></div><a tabindex="0" role="link" data-a="go" data-v="settings">⚙ ${t('settings','Settings')}</a><div style="padding:8px 12px">● ${online()?'Online':'Offline'}</div>`;
+$('#bnav').innerHTML=nav;
+$('#top').innerHTML=`<h2>${t(V,V[0].toUpperCase()+V.slice(1))}</h2><div class="row"><span class="mut" title="${online()?'Online — local data ready to sync.':"You're offline. Your audit data is safely stored on this device."}">${online()?'🟢 Online':'⚪ Offline'}</span><b>${esc(S.biz.name)}</b><button class="sm ghost" data-a="ui" aria-label="Switch language">${S.ui==='te'?'English':'తెలుగు'}</button><span aria-hidden="true">🔔 👤</span></div>`;
+if(V==='dashboard'){counters();drawChart(7)}
+const mic=$('#mic');if(mic){micUI();mic.addEventListener('click',toggleRecording)}
+const pf=$('#pf');if(pf)pf.onsubmit=e=>{e.preventDefault();const d=new FormData(pf);Object.assign(S.biz,{name:d.get('name'),type:d.get('type'),loc:d.get('loc'),tariff:Math.max(0,+d.get('tariff')||0)});save();toast('Equipment updated.');render()}}
+/* ===== APPLIANCES & FORMS ===== */
+const findItem=id=>A.draft.find(x=>x.id===id)||S.items.find(x=>x.id===id);
+function form(i,draft){const x=i||{name:'',cat:'other',qty:1,power:'',hours:''};
+modal(`<h3>${i?'Edit':'Add'} equipment</h3><form id="ef"><label>Equipment name</label><input name="name" required value="${esc(x.name)}"><label>Category</label><select name="cat">${Object.keys(CAT).map(c=>`<option ${c===x.cat?'selected':''}>${c}</option>`).join('')}</select><label>Quantity</label><input name="qty" type="number" min="1" step="1" required value="${x.qty}"><label>Power (watts)</label><input name="power" type="number" min="1" step="any" value="${x.power??''}"><label>Hours per day</label><input name="hours" type="number" min="0" max="24" step="any" required value="${x.hours??''}"><div id="ferr" role="alert" style="color:#991b1b;font-size:13px;margin-top:6px"></div><br><div class="row"><button type="submit">Save</button><button type="button" class="ghost" data-a="close">Cancel</button></div></form>`);
+$('#ef').onsubmit=e=>{e.preventDefault();const d=new FormData($('#ef')),o={name:d.get('name').trim(),cat:d.get('cat'),qty:+d.get('qty'),power:d.get('power')?+d.get('power'):null,hours:+d.get('hours')};
+const er=!o.name?'Enter an equipment name.':!(o.qty>0)?'Quantity must be greater than 0.':(o.power!==null&&!(o.power>0))?'Power must be greater than 0 W.':(!(o.hours>=0&&o.hours<=24))?'Hours per day must be between 0 and 24.':'';if(er){$('#ferr').textContent=er;return}
+if(i){const keep=i.source==='user_estimated'&&i.power===o.power;Object.assign(i,o,{source:o.power?(keep?'user_estimated':'user_provided'):'missing'})}
+else(draft?A.draft:S.items).push({id:uid(),...o,source:o.power?'user_provided':'missing'});
+save();closeModal();toast('Equipment updated.');render()}}
+function powerPicker(i){const o=[['Small',500],['Medium',1000],['Heavy',2200]];
+modal(`<h3>Power rating missing</h3><p class="mut">Choose an estimate for ${esc(i.name)}. It will be marked ESTIMATED, never as a value you gave.</p><br>${o.map(x=>`<button class="ghost" style="width:100%;margin-bottom:8px" data-a="pick" data-id="${i.id}" data-w="${x[1]}">${x[0]} ≈ ${x[1]} W</button>`).join('')}<label>Enter exact wattage</label><input id="ex" type="number" min="1"><br><br><div class="row"><button data-a="pick" data-id="${i.id}" data-w="exact">Use exact value</button><button class="ghost" data-a="close">I don't know</button></div>`)}
+/* ===== AUDIT FLOW ===== */
+async function processTx(){{const el=$('#tx');if(el)A.tx=el.value}if(!A.tx.trim()){toast('Add or speak a transcript first.');return}if(!A.src)A.src='manual';console.log('[URJA] Extracting from source:',A.src);
+A.stage='processing';render();for(const l of [...document.querySelectorAll('#steps li')].slice(0,3)){await new Promise(r=>setTimeout(r,350));l.className='ok';l.textContent='✓ '+l.textContent.slice(2)}
+await new Promise(r=>setTimeout(r,300));A.draft=demoExtractAppliances(A.tx);A.stage='review';
+if(!A.draft.length)toast("We couldn't process that yet. Add equipment manually.");render()}
+function calcDraft(){if(!A.draft.length){toast('Add at least one appliance.');return}
+if(A.draft.some(i=>!(i.power>0))){toast('Power rating required before calculation.');return}
+if(A.draft.some(i=>i.hours==null||!calculateAppliance(i,S.biz.tariff))){toast('Please review this equipment information.');return}
+S.items=A.draft.map(x=>({...x}));save();A.stage='results';toast('Calculation completed.');render()}
+/* ===== GUIDED 2-MINUTE DEMO ===== */
+let demoRun=false;
+let demoSkip=false;
+async function runDemo(){if(demoRun)return;demoRun=true;demoSkip=false;S=demoData();save();A={stage:'idle',tx:'',lang:'te',draft:[]};
+$('#demobar').style.display='block';
+const steps=[['Voice Audit opened',()=>{V='audit'}],['Telugu transcript appears (explicit demo)',()=>{A.tx=DEMO_TX;A.src='demo'}],['Equipment extraction (demo mode)',()=>{A.draft=demoExtractAppliances(A.tx);A.stage='review'}],['Review screen: every value is verified by you',()=>{}],['Energy calculation (deterministic JavaScript)',()=>{S.items=A.draft.map(x=>({...x}));save();A.stage='results'}],['Dashboard updated',()=>{V='dashboard'}],['Insights',()=>{V='insights'}],['Maintenance plan',()=>{V='maintenance'}],['Energy audit report',()=>{V='reports'}]];
+for(let i=0;i<steps.length&&!demoSkip;i++){$('#demotxt').innerHTML=`<b>${i+1} / ${steps.length}</b> ${steps[i][0]} <button class="sm ghost" data-a="skipDemo" style="float:right;min-height:32px">Skip Demo</button>`;$('#demoprog').style.width=((i+1)/steps.length*100)+'%';steps[i][1]();render();await new Promise(r=>setTimeout(r,2000))}
+$('#demobar').style.display='none';demoRun=false;clearCurrentTranscript();if(demoSkip){A.stage='idle';A.draft=[];V='dashboard';render()}else toast('Report ready.')}
+/* ===== ACTIONS (event delegation) ===== */
+const ACT={
+go:d=>go(d.v),runDemo,
+ui:()=>{S.ui=S.ui==='te'?'en':'te';A.lang=S.ui;save();render()},
+lang:d=>{A.lang=d.l;A.tx=($('#tx')||{}).value||A.tx;render()},
+demoVoice:()=>{cancelRec();A.tx=A.lang==='te'?DEMO_TX:DEMO_TX_EN;A.src='demo';A.vs='ready';finalTranscript='';console.log('[URJA] Demo input explicitly selected');render();toast('Demo transcript loaded.')},
+process:processTx,calc:calcDraft,
+add:d=>form(null,!!d.d),
+edit:d=>form(findItem(d.id),false),
+del:d=>{A.draft=A.draft.filter(x=>x.id!==d.id);S.items=S.items.filter(x=>x.id!==d.id);save();toast('Equipment removed.');render()},
+power:d=>powerPicker(findItem(d.id)),
+pick:d=>{const i=findItem(d.id),w=d.w==='exact'?+($('#ex')||{}).value:+d.w;if(!(w>0)){toast('Please enter a valid wattage.');return}i.power=w;i.source='user_estimated';save();closeModal();toast('Equipment updated.');render()},
+math:d=>{const e=$('#m'+d.n);if(e)e.hidden=!e.hidden},
+range:d=>drawChart(+d.n),
+done:d=>{S.tasks.find(x=>x.id===d.id).done=true;save();toast('Maintenance task completed.');render()},
+resched:d=>{const x=S.tasks.find(x=>x.id===d.id),dt=new Date(x.due);dt.setDate(dt.getDate()+7);x.due=dt.toISOString().slice(0,10);save();toast('Task rescheduled.');render()},
+addTask:()=>{modal(`<h3>Add maintenance task</h3><form id="tf"><label>Equipment</label><input name="eq" required><label>Task</label><input name="task" required><label>Due in (days)</label><input name="days" type="number" min="0" value="7"><br><div class="row"><button type="submit">Add Task</button><button type="button" class="ghost" data-a="close">Cancel</button></div></form>`);
+$('#tf').onsubmit=e=>{e.preventDefault();const d=new FormData($('#tf'));S.tasks.push({id:uid(),eq:d.get('eq').trim(),task:d.get('task').trim(),due:day(Math.max(0,+d.get('days')||0)),done:false});save();closeModal();toast('Equipment updated.');render()}},
+print:()=>window.print(),
+download:()=>{const el=$('#report');if(!el)return;const h='<!DOCTYPE html><html><head><meta charset="utf-8"><title>URJA Voice Energy Audit Report</title><style>body{font-family:Arial,sans-serif;max-width:900px;margin:20px auto;padding:0 16px}table{width:100%;border-collapse:collapse}th,td{padding:6px;border-bottom:1px solid #ccc;text-align:left}.row{display:flex;justify-content:space-between}</style></head><body>'+el.outerHTML+'</body></html>';
+const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([h],{type:'text/html'}));a.download='urja-voice-energy-audit-report.html';a.click();toast('Report ready.')},
+sync:demoSync,
+info:()=>modal(`<h3>Demo mode</h3><p class="mut">Voice uses your browser's speech recognition (not Bhashini). Extraction and recommendations are rule-based demos, not a live LLM. Data stays in this browser's local storage. All energy and cost numbers come from plain JavaScript formulas.</p><br><button data-a="close">Got it</button>`),
+reset:()=>modal(`<h3>Reset Demo Data</h3><p class="mut">Reset the application to the default hackathon demo?</p><br><div class="row"><button class="ghost" data-a="close">Cancel</button><button class="warn" data-a="resetOk">Reset</button></div>`),
+resetOk:()=>{S=demoData();A={stage:'idle',tx:'',lang:'te',draft:[]};save();closeModal();toast('Audit saved successfully.');render()},
+close:closeModal,skipDemo:()=>{demoSkip=true;$('#demobar').style.display='none'},manual:()=>{const x=$('#tx');if(x)x.focus()},another:()=>{cancelRec();clearCurrentTranscript();A.stage='idle';A.draft=[];V='audit';render();scrollTo(0,0)}};
+/* ===== EVENT LISTENERS ===== */
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]');if(b&&ACT[b.dataset.a])ACT[b.dataset.a](b.dataset,b)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();if((e.key==='Enter'||e.key===' ')&&e.target.matches('a[data-a],span[data-a]')){e.preventDefault();e.target.click()}});
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal()});
+window.addEventListener('online',()=>{toast('Online — local data ready to sync.');render()});
+window.addEventListener('offline',()=>{toast("You're offline. Your audit data is safely stored on this device.");render()});
+document.addEventListener('change',e=>{if(e.target.id==='langsel'){A.tx=($('#tx')||{}).value||A.tx;A.lang=e.target.value;S.ui=A.lang;save();render()}});
+document.addEventListener('input',e=>{if(e.target.id==='tx'&&A.vs!=='listening'){A.tx=e.target.value;A.src=A.tx.trim()?'manual':null;if(A.src)console.log('[URJA] Transcript source: MANUAL');updSrc()}});
+/* ===== INIT ===== */
+load();A.lang=S.ui||'en';clearCurrentTranscript();render();
+</script>
+</body>
+</html>
